@@ -1,0 +1,24 @@
+/MemLeafApp/**/.project
+/MemLeafApp/**/.settings
+/MemLeafApp/**/.classpath
+/MemLeafApp/**/.checkstyle
+/MemLeafApp/**/target
+**/.project
+**/.settings
+**/.classpath
+**/.idea/
+**/.idea
+**/*.*~
+**/*.jar
+**/*.class
+**/*.log
+**/target/
+**/*.iml
+*.*~
+
+# Package Files #
+*.jar
+*.ear
+*.war
+
+.gitgnore
