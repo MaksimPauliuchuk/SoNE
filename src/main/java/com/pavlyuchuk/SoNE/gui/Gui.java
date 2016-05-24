@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -20,7 +22,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.pavlyuchuk.SoNE.Solutions.QuasilinearParabolicProblem;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -30,13 +31,16 @@ import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import com.pavlyuchuk.SoNE.Solutions.QuasilinearParabolicProblem;
+import com.pavlyuchuk.SoNE.model.Answer;
 import com.pavlyuchuk.SoNE.model.Model;
 
 /**
  * @author Maksim Pauliuchuk
  */
 @SuppressWarnings("serial")
-public class Gui extends JFrame {
+public class Gui extends JFrame
+{
 	private int width = 1000;
 	private int height = 600;
 
@@ -100,6 +104,8 @@ public class Gui extends JFrame {
 	private JTextField timeKNTable_Text;
 	private JTextField ittarationsKNTable_Text;
 
+	List<JTextField> table = new ArrayList<>();
+
 	private JCheckBox twoLayer_Box;
 	private JCheckBox threeLayer_Box;
 	private JCheckBox KNLayer_Box;
@@ -117,7 +123,8 @@ public class Gui extends JFrame {
 	private JButton openButton;
 	private JButton startButton;
 
-	public Gui() {
+	public Gui()
+	{
 		super("Solution of Nonlinear Equations");
 		initialize();
 
@@ -130,7 +137,8 @@ public class Gui extends JFrame {
 		createBackground();
 	}
 
-	private void initialize() {
+	private void initialize()
+	{
 		Font font = new Font("Times", Font.BOLD, 16);
 		Character mu = new Character((char) 956);
 		Character eps = new Character((char) 949);
@@ -392,6 +400,22 @@ public class Gui extends JFrame {
 		exactSolution_Box.setBounds(marginLeft + 2, marginTop + 5, 20, 20);
 		exactSolution_Box.setBorder(null);
 		exactSolution_Box.setBackground(Color.WHITE);
+		exactSolution_Box.setSelected(true);
+		exactSolution_Box.addItemListener(new ItemListener()
+		{
+			@Override
+			public void itemStateChanged(ItemEvent e)
+			{
+				if (e.getStateChange() == ItemEvent.SELECTED)
+				{
+					useRunge_Box.setSelected(false);
+				}
+				else
+				{
+					useRunge_Box.setSelected(true);
+				}
+			}
+		});
 		add(exactSolution_Box);
 
 		exactSolution_Label = new JLabel("Точное решение=");
@@ -415,6 +439,21 @@ public class Gui extends JFrame {
 		useRunge_Box.setBounds(marginLeft + 2, marginTop + 5, 20, 20);
 		useRunge_Box.setBorder(null);
 		useRunge_Box.setBackground(Color.WHITE);
+		useRunge_Box.addItemListener(new ItemListener()
+		{
+			@Override
+			public void itemStateChanged(ItemEvent e)
+			{
+				if (e.getStateChange() == ItemEvent.SELECTED)
+				{
+					exactSolution_Box.setSelected(false);
+				}
+				else
+				{
+					exactSolution_Box.setSelected(true);
+				}
+			}
+		});
 		add(useRunge_Box);
 
 		useRunge_Label = new JLabel("Итерации Runge=");
@@ -451,81 +490,91 @@ public class Gui extends JFrame {
 		openFileName_Label.setBorder(null);
 		add(openFileName_Label);
 
-		openButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		openButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				fc.showOpenDialog(Gui.this);
 				File file = fc.getSelectedFile();
 
-				try (Scanner scanner = new Scanner(file)) {
+				try (Scanner scanner = new Scanner(file))
+				{
 					String line = "";
 					String[] split;
-					while (scanner.hasNext()) {
+					while (scanner.hasNext())
+					{
 						line = scanner.nextLine();
 						split = line.split("=");
 
-						switch (split[0]) {
-						case "mu1":
-							mu1_Text.setText(split[1]);
-							break;
-						case "mu2":
-							mu2_Text.setText(split[1]);
-							break;
-						case "mu3":
-							mu3_Text.setText(split[1]);
-							break;
-						case "K":
-							K_Text.setText(split[1]);
-							break;
-						case "Ku":
-							Ku_Text.setText(split[1]);
-							break;
-						case "g":
-							g_Text.setText(split[1]);
-							break;
-						case "xFrom":
-							xFrom_Text.setText(split[1]);
-							break;
-						case "xTo":
-							xTo_Text.setText(split[1]);
-							break;
-						case "tFrom":
-							tFrom_Text.setText(split[1]);
-							break;
-						case "tTo":
-							tTo_Text.setText(split[1]);
-							break;
-						case "N":
-							N_Text.setText(split[1]);
-							break;
-						case "M":
-							M_Text.setText(split[1]);
-							break;
-						case "eSystem":
-							eSystem_Text.setText(split[1]);
-							break;
-						case "eRunge":
-							eRunge_Text.setText(split[1]);
-							break;
-						case "exactSolution":
-							exactSolution_Text.setText(split[1]);
-							break;
-						case "rungeCount":
-							useRunge_Text.setText(split[1]);
-							break;
-						default: {
-							textList.forEach((k) -> k.setText(""));
-							String message = "Неизвестный элемент \"" + split[0]
-									+ "\".\nИсправьте файл и попробуйте еще раз.\nФайл должен иметь следующий формат: \nmu1=\nmu2=\nmu3=\nK=\nKu=\ng=\nxFrom=\nxTo=\ntFrom=\ntTo=\nN=\nM=\neSystem=\neRunge=\nexactSolution=\nrungeCount=";
-							JOptionPane.showMessageDialog(new JFrame(), message, "Неверный формат файла",
-									JOptionPane.ERROR_MESSAGE);
-							return;
-						}
+						switch (split[0])
+						{
+							case "mu1":
+								mu1_Text.setText(split[1]);
+								break;
+							case "mu2":
+								mu2_Text.setText(split[1]);
+								break;
+							case "mu3":
+								mu3_Text.setText(split[1]);
+								break;
+							case "K":
+								K_Text.setText(split[1]);
+								break;
+							case "Ku":
+								Ku_Text.setText(split[1]);
+								break;
+							case "g":
+								g_Text.setText(split[1]);
+								break;
+							case "xFrom":
+								xFrom_Text.setText(split[1]);
+								break;
+							case "xTo":
+								xTo_Text.setText(split[1]);
+								break;
+							case "tFrom":
+								tFrom_Text.setText(split[1]);
+								break;
+							case "tTo":
+								tTo_Text.setText(split[1]);
+								break;
+							case "N":
+								N_Text.setText(split[1]);
+								break;
+							case "M":
+								M_Text.setText(split[1]);
+								break;
+							case "eSystem":
+								eSystem_Text.setText(split[1]);
+								break;
+							case "eRunge":
+								eRunge_Text.setText(split[1]);
+								break;
+							case "exactSolution":
+								exactSolution_Text.setText(split[1]);
+								break;
+							case "rungeCount":
+								useRunge_Text.setText(split[1]);
+								break;
+							default:
+							{
+								textList.forEach((k) -> k.setText(""));
+								String message = "Неизвестный элемент \"" + split[0]
+										+ "\".\nИсправьте файл и попробуйте еще раз.\nФайл должен иметь следующий формат: \nmu1=\nmu2=\nmu3=\nK=\nKu=\ng=\nxFrom=\nxTo=\ntFrom=\ntTo=\nN=\nM=\neSystem=\neRunge=\nexactSolution=\nrungeCount=";
+								JOptionPane.showMessageDialog(new JFrame(), message, "Неверный формат файла",
+										JOptionPane.ERROR_MESSAGE);
+								return;
+							}
 						}
 					}
 					openFileName_Label.setText(file.getName());
-				} catch (FileNotFoundException e1) {
+				}
+				catch (FileNotFoundException e1)
+				{
 					e1.getMessage();
-				} catch (Exception e2) {
+				}
+				catch (Exception e2)
+				{
 					e2.getMessage();
 				}
 			}
@@ -546,24 +595,99 @@ public class Gui extends JFrame {
 		startButton.setBorder(null);
 		startButton.setBackground(Color.LIGHT_GRAY);
 
-		startButton.addActionListener(new ActionListener() {
+		startButton.addActionListener(new ActionListener()
+		{
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 				seriesKN.clear();
 				seriesReal.clear();
 				seriesThree.clear();
 				seriesTwo.clear();
+
+				for (JTextField field : table)
+				{
+					field.setText("");
+				}
 
 				Model model = new Model(mu1_Text.getText(), mu2_Text.getText(), mu3_Text.getText(), K_Text.getText(),
 						Ku_Text.getText(), g_Text.getText(), xFrom_Text.getText(), xTo_Text.getText(),
 						tFrom_Text.getText(), tTo_Text.getText(), N_Text.getText(), M_Text.getText(),
 						eSystem_Text.getText(), eRunge_Text.getText(), exactSolution_Text.getText(),
 						useRunge_Text.getText());
-                QuasilinearParabolicProblem obj1 = new QuasilinearParabolicProblem(model);
-                obj1.initialization();
-                obj1.conditions();
-                obj1.getAnswerWithRunge();
+
+				if (twoLayer_Box.isSelected())
+				{
+					if (exactSolution_Box.isSelected())
+					{
+						QuasilinearParabolicProblem twoExact = new QuasilinearParabolicProblem(model);
+						twoExact.initialization();
+						twoExact.conditions();
+						Answer ans = twoExact.getAnswerTwoLayerWithoutRunge();
+						timeTwoTable_Text.setText(ans.time + "");
+						accuracyTwoTable_Text.setText(ans.accuracy + "");
+						for (int i = 0; i < ans.x.length; i++)
+						{
+							seriesTwo.add(ans.x[i], ans.points[i]);
+						}
+					}
+					else
+					{
+						QuasilinearParabolicProblem twoExact = new QuasilinearParabolicProblem(model);
+						twoExact.initialization();
+						twoExact.conditions();
+						Answer ans = twoExact.getAnswerTwoLayerWithRunge();
+						timeTwoTable_Text.setText(ans.time + "");
+						accuracyTwoTable_Text.setText(ans.accuracy + "");
+						for (int i = 0; i < ans.x.length; i++)
+						{
+							seriesTwo.add(ans.x[i], ans.points[i]);
+						}
+					}
+				}
+
+				if (threeLayer_Box.isSelected())
+				{
+					if (exactSolution_Box.isSelected())
+					{
+						QuasilinearParabolicProblem three = new QuasilinearParabolicProblem(model);
+						three.initialization();
+						three.conditions();
+						Answer ans = three.getAnswerThreeLayerWithoutRunge();
+						timeThreeTable_Text.setText(ans.time + "");
+						accuracyThreeTable_Text.setText(ans.accuracy + "");
+						for (int i = 0; i < ans.x.length; i++)
+						{
+							seriesThree.add(ans.x[i], ans.points[i]);
+						}
+					}
+					else
+					{
+						QuasilinearParabolicProblem three = new QuasilinearParabolicProblem(model);
+						three.initialization();
+						three.conditions();
+						Answer ans = three.getAnswerThreeLayerWithRunge();
+						timeThreeTable_Text.setText(ans.time + "");
+						accuracyThreeTable_Text.setText(ans.accuracy + "");
+						for (int i = 0; i < ans.x.length; i++)
+						{
+							seriesThree.add(ans.x[i], ans.points[i]);
+						}
+					}
+				}
+
+				if (exactSolution_Box.isSelected())
+				{
+					QuasilinearParabolicProblem real = new QuasilinearParabolicProblem(model);
+					real.initialization();
+					real.conditions();
+					Answer ans = real.getReal();
+					for (int i = 0; i < ans.x.length; i++)
+					{
+						seriesReal.add(ans.x[i], ans.points[i]);
+					}
+				}
 			}
 		});
 
@@ -596,8 +720,9 @@ public class Gui extends JFrame {
 
 		itterationsTable_Label = new JLabel();
 		itterationsTable_Label.setText("Runge");
-		itterationsTable_Label.setBounds(marginLeft + accuracyTable_Label.getWidth() + timeTable_Label.getWidth() + 220,
-				marginTop, 60, defaultHeight);
+		itterationsTable_Label.setBounds(
+				marginLeft + accuracyTable_Label.getWidth() + timeTable_Label.getWidth() + 220, marginTop, 60,
+				defaultHeight);
 		itterationsTable_Label.setFont(font);
 		itterationsTable_Label.setBorder(null);
 		marginTop += defaultHeight;
@@ -623,6 +748,7 @@ public class Gui extends JFrame {
 		accuracyTwoTable_Text.setFont(font);
 		accuracyTwoTable_Text.setBorder(null);
 		add(accuracyTwoTable_Text);
+		table.add(accuracyTwoTable_Text);
 
 		timeTwoTable_Text = new JTextField();
 		timeTwoTable_Text.setBounds(marginLeft + twoLayer_Box.getWidth() + twoLayerMethoTable_Label.getWidth()
@@ -630,6 +756,7 @@ public class Gui extends JFrame {
 		timeTwoTable_Text.setFont(font);
 		timeTwoTable_Text.setBorder(null);
 		add(timeTwoTable_Text);
+		table.add(timeTwoTable_Text);
 
 		ittarationsTwoTable_Text = new JTextField();
 		ittarationsTwoTable_Text.setBounds(
@@ -640,6 +767,7 @@ public class Gui extends JFrame {
 		ittarationsTwoTable_Text.setBorder(null);
 		marginTop += defaultHeight;
 		add(ittarationsTwoTable_Text);
+		table.add(ittarationsTwoTable_Text);
 
 		// --------------------------------------------------------------
 
@@ -662,6 +790,7 @@ public class Gui extends JFrame {
 		accuracyThreeTable_Text.setFont(font);
 		accuracyThreeTable_Text.setBorder(null);
 		add(accuracyThreeTable_Text);
+		table.add(accuracyThreeTable_Text);
 
 		timeThreeTable_Text = new JTextField();
 		timeThreeTable_Text.setBounds(marginLeft + threeLayer_Box.getWidth() + threeLayerMethoTable_Label.getWidth()
@@ -669,6 +798,7 @@ public class Gui extends JFrame {
 		timeThreeTable_Text.setFont(font);
 		timeThreeTable_Text.setBorder(null);
 		add(timeThreeTable_Text);
+		table.add(timeThreeTable_Text);
 
 		ittarationsThreeTable_Text = new JTextField();
 		ittarationsThreeTable_Text.setBounds(
@@ -679,6 +809,7 @@ public class Gui extends JFrame {
 		ittarationsThreeTable_Text.setBorder(null);
 		marginTop += defaultHeight;
 		add(ittarationsThreeTable_Text);
+		table.add(ittarationsThreeTable_Text);
 
 		// --------------------------------------------------------------
 
@@ -700,6 +831,7 @@ public class Gui extends JFrame {
 		accuracyKNTable_Text.setFont(font);
 		accuracyKNTable_Text.setBorder(null);
 		add(accuracyKNTable_Text);
+		table.add(accuracyKNTable_Text);
 
 		timeKNTable_Text = new JTextField();
 		timeKNTable_Text.setBounds(
@@ -708,6 +840,7 @@ public class Gui extends JFrame {
 		timeKNTable_Text.setFont(font);
 		timeKNTable_Text.setBorder(null);
 		add(timeKNTable_Text);
+		table.add(timeKNTable_Text);
 
 		ittarationsKNTable_Text = new JTextField();
 		ittarationsKNTable_Text.setBounds(marginLeft + KNLayer_Box.getWidth() + KNMethoTable_Label.getWidth()
@@ -716,6 +849,7 @@ public class Gui extends JFrame {
 		ittarationsKNTable_Text.setBorder(null);
 		marginTop += defaultHeight;
 		add(ittarationsKNTable_Text);
+		table.add(ittarationsKNTable_Text);
 
 		// --------------------------------------------------------------
 
@@ -747,7 +881,8 @@ public class Gui extends JFrame {
 		add(chartPanel);
 	}
 
-	void createBackground() {
+	void createBackground()
+	{
 
 		JPanel panel = new JPanel();
 		panel.setBounds(0, 0, width, height);
