@@ -62,25 +62,42 @@ public class QuasilinearParabolicProblem
         }
     }
 
-    public Answer getAnswerWithoutRunge() //без рунге
+    public Answer getAnswerTwoLayerWithoutRunge() //без рунге
     {
         Answer answer = new Answer();
-        vectorTao1 = findLastLayer(M, vector, tao);
+        vectorTao1 = findMLayer(M, vector, tao);
         answer.accuracy = realFunctionNeviazka(vectorTao1);
         System.out.println(answer.accuracy);
         return answer;
     }
 
-    public Answer getAnswerWithRunge()  //С Рунге (до первого слоя ищем тау, потом даем разницу между этим оптимальным
-                                        // и оптимальным / 2)
+    public Answer getAnswerThreeLayerWithoutRunge() //без рунге
+    {
+        Answer answer = new Answer();
+        if (M % 2 == 0)
+        {
+            vectorTao1 = findMLayer(M / 2, vector, 2*tao);
+        }
+        else
+        {
+            vectorTao2 = findMLayer(1, vector, tao);
+            vectorTao1 = findMLayer((M - 1) / 2, vectorTao2, 2*tao);
+        }
+        answer.accuracy = realFunctionNeviazka(vectorTao1);
+        System.out.println(answer.accuracy);
+        return answer;
+    }
+
+    public Answer getAnswerTwoLayerWithRunge()
     {
         Answer answer = new Answer();
         double norma = 0;
         int iterRunge = 0;
-        vectorTao1 = findLastLayer(1, vector, tao);
+        int i = 1;
+        vectorTao1 = findMLayer(1, vector, tao);
         while (iterRunge++ < RungeNumber)
         {
-            vectorTao2 = findLastLayer(2, vector, tao/2);
+            vectorTao2 = findMLayer((int) Math.pow(2,i), vector, tao * Math.pow(2,-i));
             norma = norma(vectorTao1, vectorTao2);
             if (norma < eRunge)
             {
@@ -91,16 +108,57 @@ public class QuasilinearParabolicProblem
                 vectorTao1 = vectorTao2.clone();
                 M *= 2;
                 tao /= 2;
+                i++;
             }
         }
-        vectorTao1 = findLastLayer(M, vector, tao);
-        vectorTao2 = findLastLayer(M * 2, vector, tao/2);
+        vectorTao1 = findMLayer(M, vector, tao);
+        vectorTao2 = findMLayer(M * 2, vector, tao/2);
         answer.accuracy = norma(vectorTao1, vectorTao2);
         System.out.println(answer.accuracy);
         return answer;
     }
 
-    private double[] findLastLayer(int M, double[] stroka, double tao)
+    public Answer getAnswerThreeLayerWithRunge()
+    {
+        Answer answer = new Answer();
+        double norma = 0;
+        int iterRunge = 0;
+        int i = 1;
+        vectorTao1 = findMLayer(1, vector, tao);
+        while (iterRunge++ < RungeNumber)
+        {
+            vectorTao2 = findMLayer((int) Math.pow(2,i), vector, tao * Math.pow(2,-i));
+            norma = norma(vectorTao1, vectorTao2);
+            if (norma < eRunge)
+            {
+                break;
+            }
+            else
+            {
+                vectorTao1 = vectorTao2.clone();
+                M *= 2;
+                tao /= 2;
+                i++;
+            }
+        }
+        if (M % 2 == 0)
+        {
+            vectorTao1 = findMLayer(M / 2, vector, 2*tao);
+            vectorTao2 = findMLayer(M, vector, tao);
+        }
+        else
+        {
+            vectorTao2 = findMLayer(1, vector, tao);
+            vectorTao1 = findMLayer((M - 1) / 2, vectorTao2, 2*tao);
+            vectorTao2 = findMLayer(M, vector, tao);
+        }
+
+        answer.accuracy = norma(vectorTao1, vectorTao2);
+        System.out.println(answer.accuracy);
+        return answer;
+    }
+
+    private double[] findMLayer(int M, double[] stroka, double tao)
     {
         double[] strokaout = stroka.clone();
         for (int m = 1; m <= M; m++)
@@ -367,5 +425,40 @@ public class QuasilinearParabolicProblem
         }
         norma = Math.sqrt(norma);
         return norma;
+    }
+
+    public void countKrankNikolsonScheme()
+    {
+        double [][] matrix = new double[M + 1][N + 1];
+        double delta = 0.5;
+        double gama1 = (tao * delta) / (h * h);
+        double gama2 = (tao * (1 - delta)) / (h * h);
+        double ksi1 = tao * delta;
+        double ksi2 = tao * (1 - delta);
+        double[][] massA = new double[N + 1][N + 1];
+        massA[0][0] = massA[massA.length - 1][massA.length - 1] = 1;
+        for (int i = 1; i < massA.length - 1; i++)
+        {
+            massA[i][i] = 1 + 2 * gama2;
+            massA[i][i - 1] = massA[i][i + 1] = -gama2;
+        }
+        for (int i = 1; i < M + 1; i++)
+        {
+            double[] rowB = new double[N + 1];
+            rowB[0] = matrix[i][0];
+            rowB[rowB.length - 1] = matrix[i][rowB.length - 1];
+            for (int j = 1; j < rowB.length - 1; j++)
+            {
+                rowB[j] = gama1 * matrix[i - 1][j - 1] + (1 - 2 * gama1) * matrix[i - 1][j]
+                        + gama1 * matrix[i - 1][j + 1] + ksi1 * solveG(h * j, tao * i, 0)
+                        + ksi2 * solveG(h * j, tao * (i + 1), 0);
+            }
+            double[] rowX = TridiagonalMatrixSolution.Solve(massA, rowB);
+            for (int j = 1; j < N; j++)
+            {
+                matrix[i][j] = rowX[j];
+            }
+        }
+
     }
 }
