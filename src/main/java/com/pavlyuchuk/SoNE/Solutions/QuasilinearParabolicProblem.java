@@ -71,15 +71,16 @@ public class QuasilinearParabolicProblem
         return answer;
     }
 
-    public double getAnswerWithRunge()  //С Рунге (до первого слоя ищем тау, потом даем разницу между этим оптимальным
+    public Answer getAnswerWithRunge()  //С Рунге (до первого слоя ищем тау, потом даем разницу между этим оптимальным
                                         // и оптимальным / 2)
     {
-        double answer = 0, norma = 0;
+        Answer answer = new Answer();
+        double norma = 0;
         int iterRunge = 0;
-        vectorTao1 = findLastLayer(M, vector, tao);
+        vectorTao1 = findLastLayer(1, vector, tao);
         while (iterRunge++ < RungeNumber)
         {
-            vectorTao2 = findLastLayer(M*2, vector, tao/2);
+            vectorTao2 = findLastLayer(2, vector, tao/2);
             norma = norma(vectorTao1, vectorTao2);
             if (norma < eRunge)
             {
@@ -92,7 +93,10 @@ public class QuasilinearParabolicProblem
                 tao /= 2;
             }
         }
-        answer = norma;
+        vectorTao1 = findLastLayer(M, vector, tao);
+        vectorTao2 = findLastLayer(M * 2, vector, tao/2);
+        answer.accuracy = norma(vectorTao1, vectorTao2);
+        System.out.println(answer.accuracy);
         return answer;
     }
 

@@ -135,7 +135,7 @@ public class Gui extends JFrame {
 		Character mu = new Character((char) 956);
 		Character eps = new Character((char) 949);
 
-		ImageIcon icon = new ImageIcon("pict/logo.png");
+		ImageIcon icon = new ImageIcon(Gui.class.getClassLoader().getResource("pict/logo.png"));
 		logo = new JLabel(icon);
 		logo.setBounds(0, 0, icon.getIconWidth(), icon.getIconHeight());
 		logo.setBorder(null);
@@ -563,7 +563,7 @@ public class Gui extends JFrame {
                 QuasilinearParabolicProblem obj1 = new QuasilinearParabolicProblem(model);
                 obj1.initialization();
                 obj1.conditions();
-                obj1.getAnswerWithoutRunge();
+                obj1.getAnswerWithRunge();
 			}
 		});
 
