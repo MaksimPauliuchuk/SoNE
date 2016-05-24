@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.pavlyuchuk.SoNE.Solutions.QuasilinearParabolicProblem;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -559,7 +560,10 @@ public class Gui extends JFrame {
 						tFrom_Text.getText(), tTo_Text.getText(), N_Text.getText(), M_Text.getText(),
 						eSystem_Text.getText(), eRunge_Text.getText(), exactSolution_Text.getText(),
 						useRunge_Text.getText());
-
+                QuasilinearParabolicProblem obj1 = new QuasilinearParabolicProblem(model);
+                obj1.initialization();
+                obj1.conditions();
+                obj1.getAnswerWithoutRunge();
 			}
 		});
 
