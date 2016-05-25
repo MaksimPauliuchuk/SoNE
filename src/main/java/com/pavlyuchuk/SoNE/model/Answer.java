@@ -9,8 +9,8 @@ public class Answer
 	public double accuracy; // Точность решения (невязка)
 	public long time; // Время исполнения
 	public int runge; // Число иттераций для Рунге
-	public double[] points; // Значения на слое
-	public double[] x;
+	public double[] points; // Значения на слое (y координаты точек)
+	public double[] x; // x координаты точек
 
 	public Answer(double accuracy, long time, int runge, double[] points)
 	{
