@@ -42,7 +42,7 @@ import com.pavlyuchuk.SoNE.model.Model;
 public class Gui extends JFrame
 {
 	private int width = 1000;
-	private int height = 600;
+	private int height = 630;
 
 	private int leftColumnWidth;
 
@@ -122,6 +122,11 @@ public class Gui extends JFrame
 
 	private JButton openButton;
 	private JButton startButton;
+	private JButton stopButton;
+
+	Thread twoThread = null;
+	Thread threeThread = null;
+	Thread exactThread = null;
 
 	public Gui()
 	{
@@ -619,79 +624,131 @@ public class Gui extends JFrame
 
 				if (twoLayer_Box.isSelected())
 				{
-					if (exactSolution_Box.isSelected())
+					twoThread = new Thread(new Runnable()
 					{
-						QuasilinearParabolicProblem twoExact = new QuasilinearParabolicProblem(model);
-						twoExact.initialization();
-						twoExact.conditions();
-						Answer ans = twoExact.getAnswerTwoLayerWithoutRunge();
-						timeTwoTable_Text.setText(ans.time + "");
-						accuracyTwoTable_Text.setText(ans.accuracy + "");
-						for (int i = 0; i < ans.x.length; i++)
+						public void run() // Этот метод будет выполняться в побочном потоке
 						{
-							seriesTwo.add(ans.x[i], ans.points[i]);
+							if (exactSolution_Box.isSelected())
+							{
+								QuasilinearParabolicProblem twoExact = new QuasilinearParabolicProblem(model);
+								twoExact.initialization();
+								twoExact.conditions();
+								Answer ans = twoExact.getAnswerTwoLayerWithoutRunge();
+								timeTwoTable_Text.setText(ans.time + "");
+								accuracyTwoTable_Text.setText(ans.accuracy + "");
+								for (int i = 0; i < ans.x.length; i++)
+								{
+									seriesTwo.add(ans.x[i], ans.points[i]);
+								}
+							}
+							else
+							{
+								QuasilinearParabolicProblem twoExact = new QuasilinearParabolicProblem(model);
+								twoExact.initialization();
+								twoExact.conditions();
+								Answer ans = twoExact.getAnswerTwoLayerWithRunge();
+								timeTwoTable_Text.setText(ans.time + "");
+								accuracyTwoTable_Text.setText(ans.accuracy + "");
+								for (int i = 0; i < ans.x.length; i++)
+								{
+									seriesTwo.add(ans.x[i], ans.points[i]);
+								}
+							}
 						}
-					}
-					else
-					{
-						QuasilinearParabolicProblem twoExact = new QuasilinearParabolicProblem(model);
-						twoExact.initialization();
-						twoExact.conditions();
-						Answer ans = twoExact.getAnswerTwoLayerWithRunge();
-						timeTwoTable_Text.setText(ans.time + "");
-						accuracyTwoTable_Text.setText(ans.accuracy + "");
-						for (int i = 0; i < ans.x.length; i++)
-						{
-							seriesTwo.add(ans.x[i], ans.points[i]);
-						}
-					}
+					});
+					twoThread.start(); // Запуск потока
 				}
 
 				if (threeLayer_Box.isSelected())
 				{
-					if (exactSolution_Box.isSelected())
+					threeThread = new Thread(new Runnable()
 					{
-						QuasilinearParabolicProblem three = new QuasilinearParabolicProblem(model);
-						three.initialization();
-						three.conditions();
-						Answer ans = three.getAnswerThreeLayerWithoutRunge();
-						timeThreeTable_Text.setText(ans.time + "");
-						accuracyThreeTable_Text.setText(ans.accuracy + "");
-						for (int i = 0; i < ans.x.length; i++)
+						public void run() // Этот метод будет выполняться в побочном потоке
 						{
-							seriesThree.add(ans.x[i], ans.points[i]);
+
+							if (exactSolution_Box.isSelected())
+							{
+								QuasilinearParabolicProblem three = new QuasilinearParabolicProblem(model);
+								three.initialization();
+								three.conditions();
+								Answer ans = three.getAnswerThreeLayerWithoutRunge();
+								timeThreeTable_Text.setText(ans.time + "");
+								accuracyThreeTable_Text.setText(ans.accuracy + "");
+								for (int i = 0; i < ans.x.length; i++)
+								{
+									seriesThree.add(ans.x[i], ans.points[i]);
+								}
+							}
+							else
+							{
+								QuasilinearParabolicProblem three = new QuasilinearParabolicProblem(model);
+								three.initialization();
+								three.conditions();
+								Answer ans = three.getAnswerThreeLayerWithRunge();
+								timeThreeTable_Text.setText(ans.time + "");
+								accuracyThreeTable_Text.setText(ans.accuracy + "");
+								for (int i = 0; i < ans.x.length; i++)
+								{
+									seriesThree.add(ans.x[i], ans.points[i]);
+								}
+							}
 						}
-					}
-					else
-					{
-						QuasilinearParabolicProblem three = new QuasilinearParabolicProblem(model);
-						three.initialization();
-						three.conditions();
-						Answer ans = three.getAnswerThreeLayerWithRunge();
-						timeThreeTable_Text.setText(ans.time + "");
-						accuracyThreeTable_Text.setText(ans.accuracy + "");
-						for (int i = 0; i < ans.x.length; i++)
-						{
-							seriesThree.add(ans.x[i], ans.points[i]);
-						}
-					}
+					});
+					threeThread.start(); // Запуск потока
 				}
 
 				if (exactSolution_Box.isSelected())
 				{
-					QuasilinearParabolicProblem real = new QuasilinearParabolicProblem(model);
-					real.initialization();
-					real.conditions();
-					Answer ans = real.getReal();
-					for (int i = 0; i < ans.x.length; i++)
+					exactThread = new Thread(new Runnable()
 					{
-						seriesReal.add(ans.x[i], ans.points[i]);
-					}
+						public void run() // Этот метод будет выполняться в побочном потоке
+						{
+							QuasilinearParabolicProblem real = new QuasilinearParabolicProblem(model);
+							real.initialization();
+							real.conditions();
+							Answer ans = real.getReal();
+							for (int i = 0; i < ans.x.length; i++)
+							{
+								seriesReal.add(ans.x[i], ans.points[i]);
+							}
+						}
+					});
+					exactThread.start(); // Запуск потока
 				}
 			}
 		});
 
 		add(startButton);
+
+		marginTop += 5 + defaultHeight;
+		stopButton = new JButton("Остановить");
+		stopButton.setBounds(marginLeft, marginTop, 190, defaultHeight);
+		stopButton.setFont(font);
+		stopButton.setBorder(null);
+		stopButton.setBackground(Color.LIGHT_GRAY);
+
+		stopButton.addActionListener(new ActionListener()
+		{
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if (twoThread != null)
+				{
+					twoThread.stop();
+				}
+				if (threeThread != null)
+				{
+					threeThread.stop();
+				}
+				if (exactThread != null)
+				{
+					exactThread.stop();
+				}
+			}
+		});
+
+		add(stopButton);
 
 		// --------------------------------------------------------------
 
