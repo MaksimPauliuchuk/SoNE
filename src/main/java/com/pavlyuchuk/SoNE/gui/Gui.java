@@ -8,19 +8,25 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
@@ -119,7 +125,13 @@ public class Gui extends JFrame
 	private ChartPanel chartPanel;
 
 	private JFileChooser fc;
+	private JFileChooser fcs;
 
+	private JLabel beta;
+	private DefaultComboBoxModel<String> betaDrop;
+	private String currBeta = "1";
+
+	private JButton saveButton;
 	private JButton openButton;
 	private JButton startButton;
 	private JButton stopButton;
@@ -158,7 +170,7 @@ public class Gui extends JFrame
 
 		int marginTop = icon.getIconHeight();
 		int marginLeft = 10;
-		final int defaultHeight = 30;
+		final int defaultHeight = 25;
 		final int tableHeight = 195;
 
 		// --------------------------------------------------------------
@@ -478,6 +490,40 @@ public class Gui extends JFrame
 
 		// --------------------------------------------------------------
 
+		// Beta
+
+		// --------------------------------------------------------------
+
+		beta = new JLabel();
+		beta.setText("Beta");
+		beta.setBounds(marginLeft + 2, marginTop + 5, 30, 25);
+		currBeta = "1";
+
+		betaDrop = new DefaultComboBoxModel();
+		betaDrop.addElement("1");
+		betaDrop.addElement("2");
+		betaDrop.addElement("3");
+		final JComboBox betaCombo = new JComboBox(betaDrop);
+		betaCombo.setSelectedIndex(0);
+		JScrollPane fruitListScrollPane = new JScrollPane(betaCombo);
+		fruitListScrollPane.setBounds(marginLeft + 2 + beta.getWidth(), marginTop + 5, 160, 25);
+		marginTop += defaultHeight + 10;
+		fruitListScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		fruitListScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		betaCombo.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				JComboBox cb = (JComboBox) e.getSource();
+				currBeta = (String) cb.getSelectedItem();
+			}
+		});
+		add(beta);
+		add(fruitListScrollPane);
+
+		// --------------------------------------------------------------
+
 		// File input
 
 		// --------------------------------------------------------------
@@ -589,10 +635,58 @@ public class Gui extends JFrame
 
 		// --------------------------------------------------------------
 
-		// Start button
+		// File output
 
 		// --------------------------------------------------------------
 
+		marginTop += 5;
+		fcs = new JFileChooser();
+		saveButton = new JButton("Сохранить условие");
+		saveButton.setBounds(marginLeft, marginTop, 190, defaultHeight);
+		saveButton.setFont(font);
+		saveButton.setBorder(null);
+		saveButton.setBackground(Color.LIGHT_GRAY);
+
+		saveButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+
+				fcs.showSaveDialog(Gui.this);
+				try (PrintWriter fw = new PrintWriter(fcs.getSelectedFile() + ".txt"))
+				{
+					fw.println("mu1" + "=" + mu1_Text.getText());
+					fw.println("mu2" + "=" + mu2_Text.getText());
+					fw.println("mu3" + "=" + mu3_Text.getText());
+					fw.println("K" + "=" + K_Text.getText());
+					fw.println("Ku" + "=" + Ku_Text.getText());
+					fw.println("g" + "=" + g_Text.getText());
+					fw.println("xFrom" + "=" + xFrom_Text.getText());
+					fw.println("xTo" + "=" + xTo_Text.getText());
+					fw.println("tFrom" + "=" + tFrom_Text.getText());
+					fw.println("tTo" + "=" + tTo_Text.getText());
+					fw.println("N" + "=" + N_Text.getText());
+					fw.println("M" + "=" + M_Text.getText());
+					fw.println("eSystem" + "=" + eSystem_Text.getText());
+					fw.println("eRunge" + "=" + eRunge_Text.getText());
+					fw.println("exactSolution" + "=" + exactSolution_Text.getText());
+					fw.print("rungeCount" + "=" + useRunge_Text.getText());
+				}
+				catch (IOException e1)
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		marginTop += defaultHeight;
+		add(saveButton);
+
+		// --------------------------------------------------------------
+
+		// Start button
+
+		// --------------------------------------------------------------
 		marginTop += 5;
 		startButton = new JButton("Решить");
 		startButton.setBounds(marginLeft, marginTop, 190, defaultHeight);
@@ -620,13 +714,13 @@ public class Gui extends JFrame
 						Ku_Text.getText(), g_Text.getText(), xFrom_Text.getText(), xTo_Text.getText(),
 						tFrom_Text.getText(), tTo_Text.getText(), N_Text.getText(), M_Text.getText(),
 						eSystem_Text.getText(), eRunge_Text.getText(), exactSolution_Text.getText(),
-						useRunge_Text.getText());
+						useRunge_Text.getText(), currBeta);
 
 				if (twoLayer_Box.isSelected())
 				{
 					twoThread = new Thread(new Runnable()
 					{
-						public void run() // Этот метод будет выполняться в побочном потоке
+						public void run()
 						{
 							if (exactSolution_Box.isSelected())
 							{
@@ -636,6 +730,8 @@ public class Gui extends JFrame
 								Answer ans = twoExact.getAnswerTwoLayerWithoutRunge();
 								timeTwoTable_Text.setText(ans.time + "");
 								accuracyTwoTable_Text.setText(ans.accuracy + "");
+								ittarationsTwoTable_Text.setText("");
+								;
 								for (int i = 0; i < ans.x.length; i++)
 								{
 									seriesTwo.add(ans.x[i], ans.points[i]);
@@ -649,6 +745,7 @@ public class Gui extends JFrame
 								Answer ans = twoExact.getAnswerTwoLayerWithRunge();
 								timeTwoTable_Text.setText(ans.time + "");
 								accuracyTwoTable_Text.setText(ans.accuracy + "");
+								ittarationsTwoTable_Text.setText(ans.runge + "");
 								for (int i = 0; i < ans.x.length; i++)
 								{
 									seriesTwo.add(ans.x[i], ans.points[i]);
@@ -663,7 +760,7 @@ public class Gui extends JFrame
 				{
 					threeThread = new Thread(new Runnable()
 					{
-						public void run() // Этот метод будет выполняться в побочном потоке
+						public void run()
 						{
 
 							if (exactSolution_Box.isSelected())
@@ -674,6 +771,7 @@ public class Gui extends JFrame
 								Answer ans = three.getAnswerThreeLayerWithoutRunge();
 								timeThreeTable_Text.setText(ans.time + "");
 								accuracyThreeTable_Text.setText(ans.accuracy + "");
+								ittarationsThreeTable_Text.setText("");
 								for (int i = 0; i < ans.x.length; i++)
 								{
 									seriesThree.add(ans.x[i], ans.points[i]);
@@ -687,6 +785,7 @@ public class Gui extends JFrame
 								Answer ans = three.getAnswerThreeLayerWithRunge();
 								timeThreeTable_Text.setText(ans.time + "");
 								accuracyThreeTable_Text.setText(ans.accuracy + "");
+								ittarationsThreeTable_Text.setText(ans.runge + "");
 								for (int i = 0; i < ans.x.length; i++)
 								{
 									seriesThree.add(ans.x[i], ans.points[i]);
@@ -694,14 +793,14 @@ public class Gui extends JFrame
 							}
 						}
 					});
-					threeThread.start(); // Запуск потока
+					threeThread.start();
 				}
 
 				if (exactSolution_Box.isSelected())
 				{
 					exactThread = new Thread(new Runnable()
 					{
-						public void run() // Этот метод будет выполняться в побочном потоке
+						public void run()
 						{
 							QuasilinearParabolicProblem real = new QuasilinearParabolicProblem(model);
 							real.initialization();
@@ -713,12 +812,18 @@ public class Gui extends JFrame
 							}
 						}
 					});
-					exactThread.start(); // Запуск потока
+					exactThread.start();
 				}
 			}
 		});
 
 		add(startButton);
+
+		// --------------------------------------------------------------
+
+		// Stop button
+
+		// --------------------------------------------------------------
 
 		marginTop += 5 + defaultHeight;
 		stopButton = new JButton("Остановить");

@@ -21,10 +21,12 @@ public class Model
 	private String eRunge_Text;
 	private String exactSolution_Text;
 	private String useRunge_Text;
+	private String beta_Text;
 
 	public Model(String mu1_Text, String mu2_Text, String mu3_Text, String k_Text, String ku_Text, String g_Text,
 			String xFrom_Text, String xTo_Text, String tFrom_Text, String tTo_Text, String n_Text, String m_Text,
-			String eSystem_Text, String eRunge_Text, String exactSolution_Text, String useRunge_Text)
+			String eSystem_Text, String eRunge_Text, String exactSolution_Text, String useRunge_Text,
+			String beta_Text)
 	{
 		this.mu1_Text = mu1_Text;
 		this.mu2_Text = mu2_Text;
@@ -42,6 +44,17 @@ public class Model
 		this.eRunge_Text = eRunge_Text;
 		this.exactSolution_Text = exactSolution_Text;
 		this.useRunge_Text = useRunge_Text;
+		this.beta_Text = beta_Text;
+	}
+
+	public String getBeta_Text()
+	{
+		return beta_Text;
+	}
+
+	public void setBeta_Text(String beta_Text)
+	{
+		this.beta_Text = beta_Text;
 	}
 
 	public final String getMu1_Text()
