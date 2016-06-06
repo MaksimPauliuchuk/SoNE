@@ -417,8 +417,7 @@ public class QuasilinearParabolicProblem
 								* (vectorY_M_iter[n + 1] - 2 * vectorY_M_iter[n] + vectorY_M_iter[n - 1]
 										+ stroka[n + 1] - 2 * stroka[n] + stroka[n - 1])
 						- 0.5 * (solveG(tFrom + tao * m, xFrom + n * h, stroka[n])
-								+ solveG(tFrom + tao * (m + 1), xFrom + n * h, stroka[n]))
-						- solveG(tFrom + tao * m, xFrom + n * h, stroka[n]);
+								+ solveG(tFrom + tao * (m + 1), xFrom + n * h, stroka[n]));
 			}
 			double norma_Xn = 0.0;
 			for (int n = 0; n < vectorF_Xn.length; n++)
@@ -441,11 +440,13 @@ public class QuasilinearParabolicProblem
 				norma_XnPlus +=
 						Math.pow(
 								(vectorY_M_iter[n] - stroka[n]) / tao
-										- (solveKu(tFrom + tao * m, xFrom + n * h, stroka[n])) * Math
-												.pow((vectorY_M_iter[n + 1] - vectorY_M_iter[n - 1]) / (2 * h), 2)
-						- solveK(tFrom + tao * m, xFrom + n * h, stroka[n]) / (h * h)
-								* ((vectorY_M_iter[n + 1] - 2 * vectorY_M_iter[n] + vectorY_M_iter[n - 1]))
-						- solveG(tFrom + tao * m, xFrom + n * h, stroka[n]), 2);
+										- (solveKu(tFrom + tao * m, xFrom + n * h, stroka[n]) / (16 * h * h)) * Math.pow(
+										(vectorY_M_iter[n + 1] - vectorY_M_iter[n - 1] + stroka[n + 1] - stroka[n - 1]), 2)
+										- solveK(tFrom + tao * m, xFrom + n * h, stroka[n]) / (2 * h * h)
+										* (vectorY_M_iter[n + 1] - 2 * vectorY_M_iter[n] + vectorY_M_iter[n - 1]
+										+ stroka[n + 1] - 2 * stroka[n] + stroka[n - 1])
+										- 0.5 * (solveG(tFrom + tao * m, xFrom + n * h, stroka[n])
+										+ solveG(tFrom + tao * (m + 1), xFrom + n * h, stroka[n])), 2);
 			}
 
 			norma_XnPlus = Math.sqrt(norma_XnPlus);

@@ -796,6 +796,36 @@ public class Gui extends JFrame
 					threeThread.start();
 				}
 
+				if (KNLayer_Box.isSelected())
+				{
+					if (exactSolution_Box.isSelected())
+					{
+						QuasilinearParabolicProblem kn = new QuasilinearParabolicProblem(model);
+						kn.initialization();
+						kn.conditions();
+						Answer ans = kn.getAnswerKrankNikWithoutRunge();
+						timeKNTable_Text.setText(ans.time + "");
+						accuracyKNTable_Text.setText(ans.accuracy + "");
+						for (int i = 0; i < ans.x.length; i++)
+						{
+							seriesKN.add(ans.x[i], ans.points[i]);
+						}
+					}
+					else
+					{
+						QuasilinearParabolicProblem three = new QuasilinearParabolicProblem(model);
+						three.initialization();
+						three.conditions();
+						Answer ans = three.getAnswerThreeLayerWithRunge();
+						timeThreeTable_Text.setText(ans.time + "");
+						accuracyThreeTable_Text.setText(ans.accuracy + "");
+						for (int i = 0; i < ans.x.length; i++)
+						{
+							seriesThree.add(ans.x[i], ans.points[i]);
+						}
+					}
+				}
+
 				if (exactSolution_Box.isSelected())
 				{
 					exactThread = new Thread(new Runnable()
