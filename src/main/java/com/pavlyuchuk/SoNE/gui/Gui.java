@@ -138,6 +138,7 @@ public class Gui extends JFrame
 
 	Thread twoThread = null;
 	Thread threeThread = null;
+	Thread knThread = null;
 	Thread exactThread = null;
 
 	public Gui()
@@ -731,7 +732,7 @@ public class Gui extends JFrame
 								timeTwoTable_Text.setText(ans.time + "");
 								accuracyTwoTable_Text.setText(ans.accuracy + "");
 								ittarationsTwoTable_Text.setText("");
-								;
+
 								for (int i = 0; i < ans.x.length; i++)
 								{
 									seriesTwo.add(ans.x[i], ans.points[i]);
@@ -746,6 +747,7 @@ public class Gui extends JFrame
 								timeTwoTable_Text.setText(ans.time + "");
 								accuracyTwoTable_Text.setText(ans.accuracy + "");
 								ittarationsTwoTable_Text.setText(ans.runge + "");
+
 								for (int i = 0; i < ans.x.length; i++)
 								{
 									seriesTwo.add(ans.x[i], ans.points[i]);
@@ -772,6 +774,7 @@ public class Gui extends JFrame
 								timeThreeTable_Text.setText(ans.time + "");
 								accuracyThreeTable_Text.setText(ans.accuracy + "");
 								ittarationsThreeTable_Text.setText("");
+
 								for (int i = 0; i < ans.x.length; i++)
 								{
 									seriesThree.add(ans.x[i], ans.points[i]);
@@ -786,6 +789,7 @@ public class Gui extends JFrame
 								timeThreeTable_Text.setText(ans.time + "");
 								accuracyThreeTable_Text.setText(ans.accuracy + "");
 								ittarationsThreeTable_Text.setText(ans.runge + "");
+
 								for (int i = 0; i < ans.x.length; i++)
 								{
 									seriesThree.add(ans.x[i], ans.points[i]);
@@ -798,32 +802,41 @@ public class Gui extends JFrame
 
 				if (KNLayer_Box.isSelected())
 				{
-					if (exactSolution_Box.isSelected())
+					knThread = new Thread(new Runnable()
 					{
-						QuasilinearParabolicProblem kn = new QuasilinearParabolicProblem(model);
-						kn.initialization();
-						kn.conditions();
-						Answer ans = kn.getAnswerKrankNikWithoutRunge();
-						timeKNTable_Text.setText(ans.time + "");
-						accuracyKNTable_Text.setText(ans.accuracy + "");
-						for (int i = 0; i < ans.x.length; i++)
+						public void run()
 						{
-							seriesKN.add(ans.x[i], ans.points[i]);
+							if (exactSolution_Box.isSelected())
+							{
+								QuasilinearParabolicProblem kn = new QuasilinearParabolicProblem(model);
+								kn.initialization();
+								kn.conditions();
+								Answer ans = kn.getAnswerKrankNikWithoutRunge();
+								timeKNTable_Text.setText(ans.time + "");
+								accuracyKNTable_Text.setText(ans.accuracy + "");
+								ittarationsKNTable_Text.setText("");
+								for (int i = 0; i < ans.x.length; i++)
+								{
+									seriesKN.add(ans.x[i], ans.points[i]);
+								}
+							}
+							else
+							{
+								QuasilinearParabolicProblem kn = new QuasilinearParabolicProblem(model);
+								kn.initialization();
+								kn.conditions();
+								Answer ans = kn.getAnswerKrankNikWithRunge();
+								timeKNTable_Text.setText(ans.time + "");
+								accuracyKNTable_Text.setText(ans.accuracy + "");
+								ittarationsKNTable_Text.setText(ans.runge + "");
+								for (int i = 0; i < ans.x.length; i++)
+								{
+									seriesKN.add(ans.x[i], ans.points[i]);
+								}
+							}
 						}
-					}
-					else
-					{
-						QuasilinearParabolicProblem three = new QuasilinearParabolicProblem(model);
-						three.initialization();
-						three.conditions();
-						Answer ans = three.getAnswerThreeLayerWithRunge();
-						timeThreeTable_Text.setText(ans.time + "");
-						accuracyThreeTable_Text.setText(ans.accuracy + "");
-						for (int i = 0; i < ans.x.length; i++)
-						{
-							seriesThree.add(ans.x[i], ans.points[i]);
-						}
-					}
+					});
+					knThread.start();
 				}
 
 				if (exactSolution_Box.isSelected())
@@ -875,6 +888,10 @@ public class Gui extends JFrame
 				if (threeThread != null)
 				{
 					threeThread.stop();
+				}
+				if (knThread != null)
+				{
+					knThread.stop();
 				}
 				if (exactThread != null)
 				{
